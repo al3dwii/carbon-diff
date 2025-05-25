@@ -10,5 +10,6 @@ node_modules
 # Virtualenvs & Poetry
 .env/
 .venv/
+.carbon
 # Misc
 .DS_Store

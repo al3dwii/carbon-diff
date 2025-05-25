@@ -3,8 +3,19 @@ services:
   badge:
     build:
       context: .
-      dockerfile: ./action/Dockerfile
-    entrypoint: ["uvicorn"]
-    command: ["carbon_diff.badge:app", "--host", "0.0.0.0", "--port", "8000"]
+      dockerfile: action/Dockerfile
+    command: uvicorn carbon_diff.badge:app --host 0.0.0.0 --port 8000
     ports:
       - "8000:8000"
+
+  api:
+    build:
+      context: .
+      dockerfile: action/Dockerfile
+    # override to run the API entrypoint instead of the CLI entrypoint
+    entrypoint: ["uvicorn"]
+    command: ["carbon_diff.api.main:app", "--host", "0.0.0.0", "--port", "8001"]
+    volumes:
+      - ./.carbon:/code/.carbon
+    ports:
+      - "8001:8001"

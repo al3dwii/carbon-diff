@@ -9,7 +9,7 @@ from ..ledger.models import Commit
 
 app = FastAPI(title="Carbon Diff API")
 
-@app.get("/deltas/{repo}", response_model=List[Commit])
+@app.get("/deltas/{repo:path}", response_model=List[Commit])
 def repo_deltas(repo: str, days: int = 30):
     cutoff = dt.datetime.utcnow() - dt.timedelta(days=days)
     with get_session() as s:

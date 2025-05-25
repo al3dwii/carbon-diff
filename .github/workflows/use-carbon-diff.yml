@@ -1,0 +1,66 @@
+name: Carbon Diff PR
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  carbon:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write  # allow commenting on the PR
+
+    steps:
+      # 1 ▸ Check out repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2 ▸ Prepare Docker build context
+      - name: Prepare Docker context
+        run: |
+          mkdir -p action/carbon_diff
+          rsync -a carbon_diff/ action/carbon_diff/
+          cp pyproject.toml poetry.lock README.md action/
+
+      # 3 ▸ Run the Docker Action (produces Δ JSON and writes to ledger)
+      - name: Carbon diff
+        id: diff
+        uses: ./action
+        env:
+          CARBON_DB: ${{ github.workspace }}/.carbon/ledger.db
+
+      # 4 ▸ Comment on the PR with red/green Δ badge
+      - name: Comment result
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DELTA_KWH=$(echo '${{ steps.diff.outputs }}' | jq '.kwh')
+          if (( $(echo "$DELTA_KWH > 0" | bc -l) )); then COLOR="🟥"; else COLOR="🟩"; fi
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --body "${COLOR} ΔkWh ${DELTA_KWH} (see docs)"
+
+      # 5 ▸ Install the carbon-diff CLI (so we can call carbon-record)
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install carbon-diff CLI
+        run: |
+          pip install .
+
+      # 6 ▸ Persist a row in the ledger
+      - name: Persist ledger
+        run: |
+          carbon-record \
+            "${{ github.repository }}" \
+            "${{ github.sha }}" \
+            "${{ github.event.pull_request.number }}" \
+            '${{ steps.diff.outputs }}'
+
+      # 7 ▸ (Optional) ensure FastAPI/sqlmodel deps are in place for any later tests
+      - name: Install dependencies
+        run: |
+          pip install fastapi[all] sqlmodel aiosqlite
+          pip install .
