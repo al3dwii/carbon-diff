@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Node/Next.js
+dashboard/node_modules/
+dashboard/.next/
+node_modules
+# Virtualenvs & Poetry
+.env/
+.venv/
+# Misc
+.DS_Store

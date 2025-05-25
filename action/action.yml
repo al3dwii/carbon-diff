@@ -1,0 +1,17 @@
+name: "Carbon Diff"
+description: "Compare cloud energy use between main branch and this PR"
+author: "your-GH-handle"
+
+inputs:
+  aws_bucket:
+    description: "S3 bucket containing Cost & Usage Reports (CSV)"
+    required: false
+  baseline_days:
+    description: "How many days back from HEAD to pick the baseline CUR"
+    default: "1"
+
+runs:
+  using: "docker"
+  image: "Dockerfile"
+  args:
+    - "action"

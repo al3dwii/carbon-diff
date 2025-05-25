@@ -1,0 +1,7 @@
+providers:
+  - type: aws
+    bucket: carbon-cur-bucket
+  - type: gcp
+    project: carbon-demo-123
+  - type: azure
+    csv_dir: ./fixtures/azure

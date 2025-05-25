@@ -1,0 +1,29 @@
+# activate any GCP creds first (gcloud auth application-default login)
+project_id="your-gcp-project"
+dataset="billing_export"         # the one you enabled in 2.1
+table="gcp_billing_export_v1_202405"   # adjust month suffix
+
+# choose a single partition date (the day you used in Week-2 CLI)
+export_date="20240524"
+
+# use BigQuery CLI to dump only 3 columns into Parquet
+bq query --nouse_legacy_sql \
+  --format=prettyjson \
+  --project_id="$project_id" \
+  "
+  EXPORT DATA OPTIONS(
+      uri='gs://$project_id-temp/sample_gcp.parquet',
+      format='PARQUET',
+      overwrite=true
+  ) AS
+  SELECT
+      service.description        AS service,
+      location.location          AS region,
+      usage.amount               AS usage
+  FROM \`$project_id.$dataset.$table\`
+  WHERE _PARTITIONTIME = '$export_date'
+  LIMIT 1000                     -- keep it tiny
+  "
+
+# pull the file from GCS
+gsutil cp gs://$project_id-temp/sample_gcp.parquet ./fixtures/gcp/

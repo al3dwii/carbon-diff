@@ -1,0 +1,3 @@
+lineItem/UsageAccountId,lineItem/UsageAmount,product/region,product/usageType
+111122223333,1.5,eu-west-1,EC2:RunningHours
+111122223333,10,eu-west-1,S3:TimedStorage-ByteHrs

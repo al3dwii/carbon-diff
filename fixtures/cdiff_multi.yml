@@ -1,0 +1,7 @@
+providers:
+  - type: aws
+    bucket: dummy-bucket          # not used in tests
+  - type: gcp
+    project: dummy-project        # not used in tests
+  - type: azure
+    csv_dir: fixtures/azure
